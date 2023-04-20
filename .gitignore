@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# IDE files
+.vscode/
+.vs
+.idea/
+Vulkan-Template/Vulkan-Template/x64/
+Vulkan-Template/x64/
