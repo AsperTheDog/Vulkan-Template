@@ -7,36 +7,39 @@
 #include "../SDL/Window.hpp"
 #include "PhysicalDevice.hpp"
 
+void mergeLists(std::vector<std::string>& from, std::vector<const char*>& to)
+{
+	for (auto& ext : from)
+	{
+		bool found = false;
+		for (auto req : to)
+		{
+			if (strcmp(ext.c_str(), req) == 0)
+				found = true;
+		}
+		if (!found)
+			to.push_back(ext.c_str());
+	}
+}
+
 void Instance::commit(Window* window)
 {
-	// Create the application info struct
-	vk::ApplicationInfo appInfo{
-			"Scene Viewer", VK_MAKE_VERSION(1, 0, 0),
-			"No engine", VK_MAKE_VERSION(1, 0, 0),
-			VK_API_VERSION_1_3
-	};
-
 	// Get the instance layers
 	std::vector<vk::LayerProperties> instanceLayerProperties = context.enumerateInstanceLayerProperties();
+
 	std::vector<char const*> instanceLayerNames;
-#ifdef _DEBUG
-	instanceLayerNames.push_back("VK_LAYER_KHRONOS_validation");
-#endif
+	mergeLists(this->layers, instanceLayerNames);
+
 	if (!checkLayers(instanceLayerNames, instanceLayerProperties))
-		throw std::runtime_error(
-			"Set the environment variable VK_LAYER_PATH to point to the location of your layers");
+		throw std::runtime_error("Set the environment variable VK_LAYER_PATH to point to the location of your layers");
 
 	// Get the required extensions
 	std::vector<const char*> requiredExtensions = window->getRequiredExtensions();
-#ifdef _DEBUG
-	requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-#endif
+	mergeLists(this->extensions, requiredExtensions);
 
 	// Create the instance
 	vk::InstanceCreateInfo instanceCreateInfo({}, &appInfo, instanceLayerNames, requiredExtensions);
 	this->instance = std::make_shared<vk::raii::Instance>(context, instanceCreateInfo);
-
-	window->commitSurface(&surface, this);
 }
 
 std::vector<PhysicalDevice> Instance::getPhysicalDevices()
@@ -53,6 +56,24 @@ std::vector<PhysicalDevice> Instance::getPhysicalDevices()
 uint32_t Instance::getVersion()
 {
 	return context.enumerateInstanceVersion();
+}
+
+void Instance::setAppVersion(uint32_t version)
+{
+	this->appInfo.apiVersion = version;
+	this->version = version;
+}
+
+void Instance::setAppInfo(
+	const std::string& appName, uint32_t appVersion, 
+	const std::string& engineName, uint32_t engineVersion)
+{
+	vk::ApplicationInfo appInfo{
+				appName.c_str(), appVersion,
+				engineName.c_str(), engineVersion,
+				version
+		};
+	this->appInfo = appInfo;
 }
 
 

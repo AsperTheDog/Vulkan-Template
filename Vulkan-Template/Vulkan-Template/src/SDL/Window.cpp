@@ -8,10 +8,10 @@
 #include "../VK/Instance.hpp"
 #include "../VK/Surface.hpp"
 
-Window::Window(uint16_t width, uint16_t height, const char* name) : size{ width, height }
+Window::Window(uint16_t width, uint16_t height, const char* name, Uint32 flags) : size{ width, height }
 {
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
-	window = SDL_CreateWindow("SDL Vulkan Sample", 0, 0, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_VULKAN);
+	window = SDL_CreateWindow("SDL Vulkan Sample", 0, 0, width, height, flags | SDL_WINDOW_VULKAN);
 }
 
 std::vector<const char*> Window::getRequiredExtensions()

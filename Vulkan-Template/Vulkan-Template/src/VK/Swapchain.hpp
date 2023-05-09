@@ -4,6 +4,7 @@
 #pragma once
 
 
+#include <utility>
 #include <vector>
 #include "FrameBuffer.hpp"
 
@@ -24,6 +25,9 @@ public:
 
     void commit(LogicalDevice* lDevice, Surface* surface);
     void generateFBs(RenderPass* renderPass);
+
+    void setPreferredFormat(std::vector<vk::SurfaceFormatKHR> formats) { preferredFormats = std::move(formats); }
+    void setPreferredPresentMode(std::vector<vk::PresentModeKHR> modes) { preferredPresentModes = std::move(modes); }
 
     std::shared_ptr<vk::raii::SwapchainKHR> getRaiiHandle() const { return swapchain; }
     VkSwapchainKHR getVKHandle() const { return **swapchain; }
@@ -48,14 +52,8 @@ private:
     
     std::vector<FrameBuffer> frameBuffers;
     
-    const std::vector<vk::SurfaceFormatKHR> preferredFormats = {
-            {vk::Format::eB8G8R8A8Srgb, vk::ColorSpaceKHR::eSrgbNonlinear}
-    };
-    const std::vector<vk::PresentModeKHR> preferredPresentModes = {
-            vk::PresentModeKHR::eMailbox,
-            vk::PresentModeKHR::eFifo,
-            vk::PresentModeKHR::eImmediate
-    };
+    std::vector<vk::SurfaceFormatKHR> preferredFormats;
+    std::vector<vk::PresentModeKHR> preferredPresentModes;
     
     uint32_t imageIdx;
     

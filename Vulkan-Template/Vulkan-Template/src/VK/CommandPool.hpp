@@ -6,6 +6,8 @@
 
 #include <vulkan/vulkan_raii.hpp>
 
+#include "PhysicalDevice.hpp"
+
 class LogicalDevice;
 
 class CommandPool
@@ -13,7 +15,7 @@ class CommandPool
 public:
     CommandPool() = default;
 
-    void commit(LogicalDevice* lDevice);
+    void commit(LogicalDevice* lDevice, FamilyQueueType type);
     
     std::shared_ptr<vk::raii::CommandPool> getRaiiHandle() const { return commandPool; }
     VkCommandPool getVKHandle() const { return **commandPool; }

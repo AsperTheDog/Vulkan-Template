@@ -23,6 +23,7 @@ public:
 private:
 	Window window;
 	Instance instance;
+	Surface surface;
 	PhysicalDevice pDevice;
 	LogicalDevice lDevice;
 	Swapchain swapchain;
@@ -34,4 +35,5 @@ private:
 	Fence inFlightFence;
 
 	bool findPhysicalDevice();
+	static bool isPDeviceSuitable(const PhysicalDevice& device);
 };

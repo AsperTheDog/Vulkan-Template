@@ -103,7 +103,7 @@ void Swapchain::commit(LogicalDevice* lDevice, Surface* surface)
     
     this->swapchain = std::make_shared<vk::raii::SwapchainKHR>(*lDevice->getRaiiHandle(), swapchainCreateInfo);
     this->swapchainImages = swapchain->getImages();
-    
+
     // Create the image views
     vk::ImageViewCreateInfo imageViewCreateInfo{};
     imageViewCreateInfo.viewType = vk::ImageViewType::e2D;

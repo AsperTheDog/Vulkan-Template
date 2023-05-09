@@ -6,18 +6,41 @@
 
 MainVulkan::MainVulkan() : window{ 1920, 1080, "Vulkan Template" }, pDevice{nullptr, nullptr}
 {
+		
+#ifdef _DEBUG
+	instance.addLayer("VK_LAYER_KHRONOS_validation");
+	instance.addExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
+	instance.setAppVersion(VK_API_VERSION_1_3);
 	instance.commit(&window);
 
-	if (findPhysicalDevice())
+	window.commitSurface(&surface, &instance);
+
+	if (!findPhysicalDevice())
 		throw std::runtime_error("No suitable physical device found");
 
 	lDevice.commit(&pDevice);
-	swapchain.commit(&lDevice, instance.getSurface());
+
+	swapchain.setPreferredFormat({
+		{vk::Format::eB8G8R8A8Srgb, vk::ColorSpaceKHR::eSrgbNonlinear}
+	});
+	swapchain.setPreferredPresentMode({
+		vk::PresentModeKHR::eMailbox,
+		vk::PresentModeKHR::eFifo,
+		vk::PresentModeKHR::eImmediate
+	});
+	swapchain.commit(&lDevice, &surface);
+
 	gPipeline.commit(&swapchain);
-	cPool.commit(&lDevice);
+
+	cPool.commit(&lDevice, FamilyQueueGraphics);
+
 	cBuffers.commit(&cPool);
+
 	imageAvailableSemaphore.commit(&lDevice);
 	renderFinishedSemaphore.commit(&lDevice);
+
 	inFlightFence.commit(&lDevice);
 }
 
@@ -78,15 +101,29 @@ void MainVulkan::drawFrame()
 
 bool MainVulkan::findPhysicalDevice()
 {
+	bool found = false;
 	for (auto& pDevice : instance.getPhysicalDevices())
 	{
+		pDevice.setQueuesToUse({true, true, false});
+		pDevice.setSurface(&surface);
+
+		pDevice.addSuitableCheck(isPDeviceSuitable);
 		if (pDevice.isSuitable())
 		{
 			this->pDevice = pDevice;
+			found = true;
 			break;
 		}
 	}
 
-	return this->pDevice.getRaiiHandle() == nullptr;
+	return found;
 
+}
+
+bool MainVulkan::isPDeviceSuitable(const PhysicalDevice& device)
+{
+	auto props = device.getProperties();
+
+	// Check the device is a discrete GPU
+	return props.deviceType == vk::PhysicalDeviceType::eDiscreteGpu;
 }

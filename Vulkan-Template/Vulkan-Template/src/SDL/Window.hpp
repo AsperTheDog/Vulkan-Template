@@ -18,7 +18,7 @@ public:
         uint32_t height;
     };
     
-    Window(uint16_t width, uint16_t height, const char* name);
+    Window(uint16_t width, uint16_t height, const char* name, Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_MAXIMIZED);
 	~Window() { SDL_DestroyWindow(window); }
 
     std::vector<const char*> getRequiredExtensions();
