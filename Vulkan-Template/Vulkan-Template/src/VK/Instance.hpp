@@ -29,8 +29,8 @@ public:
     void setAppVersion(uint32_t version) ;
     void setAppInfo(const std::string& appName, uint32_t appVersion, const std::string& engineName, uint32_t engineVersion);
 
-    void addExtension(std::string extension) { extensions.push_back(extension); }
-    void addLayer(std::string layer) { layers.push_back(layer); }
+    void addExtension(std::string extension) { extensions.push_back(std::move(extension)); }
+    void addLayer(std::string layer) { layers.push_back(std::move(layer)); }
 
 private:
     uint32_t version = VK_API_VERSION_1_0;

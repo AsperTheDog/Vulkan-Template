@@ -49,7 +49,7 @@ void CommandBuffer::record(RenderPass* renderPass)
 	    buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, **renderPass->getGraphicsPipeline()->getRaiiHandle());
 	    
 	    // set the viewport
-	    vk::Viewport viewport{};
+	    vk::Viewport viewport;
 	    viewport.x = 0.0f;
 	    viewport.y = 0.0f;
 	    viewport.width = (float) renderPass->getGraphicsPipeline()->getSwapchain()->getExtent().width;
@@ -59,7 +59,7 @@ void CommandBuffer::record(RenderPass* renderPass)
 	    buffer->setViewport(0, viewport);
 	    
 	    // set the scissor
-	    vk::Rect2D scissor{};
+	    vk::Rect2D scissor;
 	    scissor.offset = vk::Offset2D{0, 0};
 	    scissor.extent = renderPass->getGraphicsPipeline()->getSwapchain()->getExtent();
 	    buffer->setScissor(0, scissor);
