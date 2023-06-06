@@ -140,39 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\VK\GraphicsPipelineLayout.cpp" />
-    <ClCompile Include="src\VK\Synchronization\Fence.cpp" />
-    <ClCompile Include="src\VK\Synchronization\Semaphore.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\VK\CommandBuffers.cpp" />
-    <ClCompile Include="src\VK\CommandPool.cpp" />
-    <ClCompile Include="src\VK\FrameBuffer.cpp" />
-    <ClCompile Include="src\VK\GraphicsPipeline.cpp" />
-    <ClCompile Include="src\VK\Instance.cpp" />
-    <ClCompile Include="src\VK\LogicalDevice.cpp" />
-    <ClCompile Include="src\VK\MainVulkan.cpp" />
-    <ClCompile Include="src\VK\PhysicalDevice.cpp" />
-    <ClCompile Include="src\VK\RenderPass.cpp" />
-    <ClCompile Include="src\VK\Surface.cpp" />
-    <ClCompile Include="src\VK\Swapchain.cpp" />
-    <ClCompile Include="src\SDL\Window.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\VK\GraphicsPipelineLayout.hpp" />
-    <ClInclude Include="src\VK\Synchronization\Fence.hpp" />
-    <ClInclude Include="src\VK\Synchronization\Semaphore.hpp" />
-    <ClInclude Include="src\VK\CommandBuffers.hpp" />
-    <ClInclude Include="src\VK\CommandPool.hpp" />
-    <ClInclude Include="src\VK\FrameBuffer.hpp" />
-    <ClInclude Include="src\VK\GraphicsPipeline.hpp" />
-    <ClInclude Include="src\VK\Instance.hpp" />
-    <ClInclude Include="src\VK\LogicalDevice.hpp" />
-    <ClInclude Include="src\VK\MainVulkan.hpp" />
-    <ClInclude Include="src\VK\PhysicalDevice.hpp" />
-    <ClInclude Include="src\VK\RenderPass.hpp" />
-    <ClInclude Include="src\VK\Surface.hpp" />
-    <ClInclude Include="src\VK\Swapchain.hpp" />
-    <ClInclude Include="src\SDL\Window.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
