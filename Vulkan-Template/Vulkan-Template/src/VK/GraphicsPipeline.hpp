@@ -20,8 +20,8 @@ public:
 
     void commit(Swapchain* swapchain);
 
-    std::shared_ptr<vk::raii::Pipeline> getRaiiHandle() const { return graphicsPipeline; }
-    VkPipeline getVKHandle() const { return **graphicsPipeline; }
+    std::shared_ptr<vk::raii::Pipeline> getVKRaiiHandle() const { return graphicsPipeline; }
+    VkPipeline getVKBaseHandle() const { return **graphicsPipeline; }
 
     Swapchain* getSwapchain() const { return swapchain; }
     RenderPass* getRenderPass();
@@ -30,7 +30,7 @@ private:
     Swapchain* swapchain;
     std::shared_ptr<vk::raii::Pipeline> graphicsPipeline{};
 
-    GraphicsPipelineLayout pipelineLayout{};
+    GraphicsPipelineLayout graphicsPipelineLayout{};
     RenderPass renderPass;
     
     static std::vector<uint32_t> compile_file(
@@ -39,6 +39,6 @@ private:
             const std::string &source,
             bool optimize = false);
     
-    inline static const std::string fragShader = "shader.frag";
-    inline static const std::string vertShader = "shader.vert";
+    inline static const std::string fragmentShaderFilename = "shader.frag";
+    inline static const std::string vertexShaderFilename = "shader.vert";
 };

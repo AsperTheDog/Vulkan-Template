@@ -12,14 +12,14 @@
 
 void CommandBuffers::commit(CommandPool* cPool)
 {
-    this->cPool = cPool;
+    this->commandPool = cPool;
 
     vk::CommandBufferAllocateInfo allocInfo{};
-    allocInfo.commandPool = cPool->getVKHandle();
+    allocInfo.commandPool = cPool->getVKBaseHandle();
     allocInfo.level = vk::CommandBufferLevel::ePrimary;
     allocInfo.commandBufferCount = 1;
     
-    commandBuffers = std::make_shared<vk::raii::CommandBuffers>(*cPool->getLogicalDevice()->getRaiiHandle(), allocInfo);
+    commandBuffers = std::make_shared<vk::raii::CommandBuffers>(*cPool->getLogicalDevice()->getVKRaiiHandle(), allocInfo);
 }
 
 CommandBuffer CommandBuffers::getCommandBuffer(uint32_t index)
@@ -29,13 +29,13 @@ CommandBuffer CommandBuffers::getCommandBuffer(uint32_t index)
 
 CommandBuffer::CommandBuffer(CommandBuffers* bufferList, uint32_t idx)
 {
-    buffer = &bufferList->getRaiiHandle()->at(idx);
+    commandBuffer = &bufferList->getVKRaiiHandle()->at(idx);
     this->bufferList = bufferList;
 }
 
 void CommandBuffer::reset()
 {
-    buffer->reset((vk::CommandBufferResetFlagBits) 0);
+    commandBuffer->reset((vk::CommandBufferResetFlagBits) 0);
 }
 
 void CommandBuffer::record(RenderPass* renderPass)
@@ -43,10 +43,10 @@ void CommandBuffer::record(RenderPass* renderPass)
     vk::CommandBufferBeginInfo beginInfo{};
     beginInfo.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse;
     
-    buffer->begin(beginInfo);
-    renderPass->begin(buffer);
+    commandBuffer->begin(beginInfo);
+    renderPass->begin(commandBuffer);
 	    
-	    buffer->bindPipeline(vk::PipelineBindPoint::eGraphics, **renderPass->getGraphicsPipeline()->getRaiiHandle());
+	    commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, **renderPass->getGraphicsPipeline()->getVKRaiiHandle());
 	    
 	    // set the viewport
 	    vk::Viewport viewport;
@@ -56,17 +56,17 @@ void CommandBuffer::record(RenderPass* renderPass)
 	    viewport.height = (float) renderPass->getGraphicsPipeline()->getSwapchain()->getExtent().height;
 	    viewport.minDepth = 0.0f;
 	    viewport.maxDepth = 1.0f;
-	    buffer->setViewport(0, viewport);
+	    commandBuffer->setViewport(0, viewport);
 	    
 	    // set the scissor
 	    vk::Rect2D scissor;
 	    scissor.offset = vk::Offset2D{0, 0};
 	    scissor.extent = renderPass->getGraphicsPipeline()->getSwapchain()->getExtent();
-	    buffer->setScissor(0, scissor);
+	    commandBuffer->setScissor(0, scissor);
 	    
 	    // draw the triangle
-	    buffer->draw(3, 1, 0, 0);
+	    commandBuffer->draw(3, 1, 0, 0);
     
-    renderPass->end(buffer);
-    buffer->end();
+    renderPass->end(commandBuffer);
+    commandBuffer->end();
 }

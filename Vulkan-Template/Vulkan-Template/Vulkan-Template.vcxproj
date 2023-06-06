@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\VK\QueueFamilies.cpp" />
     <ClCompile Include="src\VK\GraphicsPipelineLayout.cpp" />
     <ClCompile Include="src\VK\Synchronization\Fence.cpp" />
     <ClCompile Include="src\VK\Synchronization\Semaphore.cpp" />
@@ -158,6 +159,7 @@
     <ClCompile Include="src\SDL\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\VK\QueueFamilies.hpp" />
     <ClInclude Include="src\VK\GraphicsPipelineLayout.hpp" />
     <ClInclude Include="src\VK\Synchronization\Fence.hpp" />
     <ClInclude Include="src\VK\Synchronization\Semaphore.hpp" />

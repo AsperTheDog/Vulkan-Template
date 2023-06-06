@@ -29,10 +29,10 @@ public:
     void setPreferredFormat(std::vector<vk::SurfaceFormatKHR> formats) { preferredFormats = std::move(formats); }
     void setPreferredPresentMode(std::vector<vk::PresentModeKHR> modes) { preferredPresentModes = std::move(modes); }
 
-    std::shared_ptr<vk::raii::SwapchainKHR> getRaiiHandle() const { return swapchain; }
-    VkSwapchainKHR getVKHandle() const { return **swapchain; }
+    std::shared_ptr<vk::raii::SwapchainKHR> getVKRaiiHandle() const { return swapchain; }
+    VkSwapchainKHR getVKBaseHandle() const { return **swapchain; }
 
-    LogicalDevice* getLogicalDevice() const { return lDevice; }
+    LogicalDevice* getLogicalDevice() const { return logicalDevice; }
 
     vk::Extent2D getExtent() const { return extent; }
     PresentProperties getPresentProperties() const { return {format.format, presentMode}; }
@@ -42,7 +42,7 @@ public:
     void setActiveIndex(uint32_t index);
 
 private:
-    LogicalDevice* lDevice;
+    LogicalDevice* logicalDevice;
     std::shared_ptr<vk::raii::SwapchainKHR> swapchain;
     
     vk::Extent2D extent;
@@ -55,7 +55,7 @@ private:
     std::vector<vk::SurfaceFormatKHR> preferredFormats;
     std::vector<vk::PresentModeKHR> preferredPresentModes;
     
-    uint32_t imageIdx;
+    uint32_t imageIndex;
     
     vk::SurfaceFormatKHR format;
     vk::PresentModeKHR presentMode;

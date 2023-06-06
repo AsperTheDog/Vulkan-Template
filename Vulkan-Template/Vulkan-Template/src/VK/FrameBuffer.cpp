@@ -21,5 +21,5 @@ void FrameBuffer::commit(vk::raii::ImageView& imgView, RenderPass* renderPass)
     framebufferInfo.layers = 1;
     
     size = vk::Extent2D(framebufferInfo.width, framebufferInfo.height);
-    frameBuffer = std::make_shared<vk::raii::Framebuffer>(*renderPass->getGraphicsPipeline()->getSwapchain()->getLogicalDevice()->getRaiiHandle(), framebufferInfo);
+    frameBuffer = std::make_shared<vk::raii::Framebuffer>(*renderPass->getGraphicsPipeline()->getSwapchain()->getLogicalDevice()->getVKRaiiHandle(), framebufferInfo);
 }

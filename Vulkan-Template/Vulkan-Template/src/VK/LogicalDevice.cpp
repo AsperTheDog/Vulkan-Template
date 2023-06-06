@@ -6,45 +6,25 @@
 #include "PhysicalDevice.hpp"
 #include "Synchronization/Fence.hpp"
 
-#include <set>
-
-LogicalDevice::LogicalDevice(LogicalDevice&& other) noexcept
-	: pDevice(other.pDevice),
-	device(other.device),
-	graphicsQueue(std::move(other.graphicsQueue)),
-	presentQueue(std::move(other.presentQueue))
+void LogicalDevice::commit()
 {
-	// Invalidate the source instance
-	other.device = nullptr;
-}
-
-void LogicalDevice::commit(PhysicalDevice* pDevice)
-{
-	this->pDevice = pDevice;
-
-	vk::DeviceCreateInfo deviceCreateInfo{};
-	FamilyQueueIndices queueFamilyIndices = pDevice->getQueueFamilyIndices();
-	std::set<uint32_t> uniqueQueueFamilies = {
-			queueFamilyIndices.graphicsFamily.value(),
-			queueFamilyIndices.presentFamily.value()
-	};
-
-	// Create a device queue
-	float queuePriority = 1.0f;
+	// Create a device vkQueue
 	std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos{};
-	for (auto queueFamily : uniqueQueueFamilies)
+	auto queueFamilies = physicalDevice->queues.getQueues();
+	for (QueueFamilies::QueueHolder& queueFamily : *queueFamilies)
 	{
 		vk::DeviceQueueCreateInfo deviceQueueCreateInfo{};
-		deviceQueueCreateInfo.queueFamilyIndex = queueFamily;
-		deviceQueueCreateInfo.queueCount = 1;
-		deviceQueueCreateInfo.pQueuePriorities = &queuePriority;
+		deviceQueueCreateInfo.queueFamilyIndex = queueFamily.queue.index;
+		deviceQueueCreateInfo.queueCount = queueFamily.queue.count;
+		deviceQueueCreateInfo.pQueuePriorities = queueFamily.priorities.data();
 		deviceQueueCreateInfos.push_back(deviceQueueCreateInfo);
 	}
+
+	vk::DeviceCreateInfo deviceCreateInfo{};
 	deviceCreateInfo.queueCreateInfoCount = deviceQueueCreateInfos.size();
 	deviceCreateInfo.pQueueCreateInfos = deviceQueueCreateInfos.data();
-
-	vk::PhysicalDeviceFeatures deviceFeatures{};
-	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+	
+	deviceCreateInfo.pEnabledFeatures = &features;
 
 	// Enable the swapchain extension
 	deviceCreateInfo.enabledExtensionCount = 1;
@@ -60,26 +40,80 @@ void LogicalDevice::commit(PhysicalDevice* pDevice)
 #endif
 
 	// Create the device
-	this->device = std::make_shared<vk::raii::Device>(*pDevice->getRaiiHandle(), deviceCreateInfo);
+	this->device = std::make_shared<vk::raii::Device>(*physicalDevice->getVKRaiiHandle(), deviceCreateInfo);
 
-	this->graphicsQueue = device->getQueue(queueFamilyIndices.graphicsFamily.value(), 0);
-	this->presentQueue = device->getQueue(queueFamilyIndices.presentFamily.value(), 0);
+	physicalDevice->queues.commitQueues(this);
 }
 
-void LogicalDevice::submitToQueue(std::vector<vk::SubmitInfo> info, Fence* fence)
+void LogicalDevice::setQueuePriorities(uint32_t queueIndex, const std::vector<float>& priorities)
 {
-	graphicsQueue.submit(info, **fence->getRaiiHandle());
+	physicalDevice->queues.updateQueue(queueIndex, priorities);
 }
 
-void LogicalDevice::presentInQueue(vk::PresentInfoKHR* info)
+void LogicalDevice::submitToQueue(
+	FamilyQueueType type, uint32_t offset, 
+	const std::vector<vk::SubmitInfo>& info, 
+	Fence* fence)
 {
-	if (presentQueue.presentKHR(*info) != vk::Result::eSuccess)
+	vk::raii::Queue* queue = nullptr;
+	uint32_t count = 0;
+	for (auto& lQueue : physicalDevice->queues.queues)
+	{
+		if (lQueue.queue.type & type)
+		{
+			if (count == offset)
+			{
+				queue = &lQueue.queue.vkQueue;
+				break;
+			}
+			count++;
+		}
+	}
+#ifdef _DEBUG
+	if (queue == nullptr)
+	{
+		throw std::runtime_error("Failed to find queue on submit");
+	}
+#endif
+
+	queue->submit(info, **fence->getVKRaiiHandle());
+}
+
+void LogicalDevice::presentInQueue(uint32_t offset, vk::PresentInfoKHR* info)
+{
+	vk::raii::Queue* queue = nullptr;
+	uint32_t count = 0;
+	for (auto& lQueue : physicalDevice->queues.queues)
+	{
+		if (lQueue.queue.type & FamilyQueuePresent)
+		{
+			if (count == offset)
+			{
+				queue = &lQueue.queue.vkQueue;
+				break;
+			}
+			count++;
+		}
+	}
+#ifdef _DEBUG
+	if (queue == nullptr)
+	{
+		throw std::runtime_error("Failed to find queue on present");
+	}
+	if (queue->presentKHR(*info) != vk::Result::eSuccess)
 	{
 		throw std::runtime_error("Failed to present swapchain image!");
 	}
+#endif
+	queue->presentKHR(*info);
 }
 
 void LogicalDevice::waitIdle()
 {
 	device->waitIdle();
+}
+
+void LogicalDevice::setQueue(vk::raii::Queue& queue, uint32_t index, int i)
+{
+	queue = device->getQueue(index, i);
 }

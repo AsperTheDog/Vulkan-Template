@@ -37,8 +37,8 @@ void GraphicsPipeline::commit(Swapchain* swapchain)
 	vk::ShaderModuleCreateInfo fragModuleInfo({}, fragSpirv.size() * sizeof(uint32_t), fragSpirv.data());
 	vk::ShaderModuleCreateInfo vertModuleInfo({}, vertSpirv.size() * sizeof(uint32_t), vertSpirv.data());
 
-	auto fragModule = swapchain->getLogicalDevice()->getRaiiHandle()->createShaderModule(fragModuleInfo);
-	auto vertModule = swapchain->getLogicalDevice()->getRaiiHandle()->createShaderModule(vertModuleInfo);
+	auto fragModule = swapchain->getLogicalDevice()->getVKRaiiHandle()->createShaderModule(fragModuleInfo);
+	auto vertModule = swapchain->getLogicalDevice()->getVKRaiiHandle()->createShaderModule(vertModuleInfo);
 
 	// Create the shader stages
 	vk::PipelineShaderStageCreateInfo fragShaderStageInfo{};
@@ -161,7 +161,7 @@ void GraphicsPipeline::commit(Swapchain* swapchain)
 	renderPass.addSubPass(subpass);
 	renderPass.commit(this, swapchain);
 
-	pipelineLayout.commit(swapchain->getLogicalDevice());
+	graphicsPipelineLayout.commit(swapchain->getLogicalDevice());
 
 	// Create the graphics pipeline
 	vk::GraphicsPipelineCreateInfo pipelineInfo{};
@@ -175,13 +175,13 @@ void GraphicsPipeline::commit(Swapchain* swapchain)
 	pipelineInfo.pDepthStencilState = nullptr;
 	pipelineInfo.pColorBlendState = &colorBlendingInfo;
 	pipelineInfo.pDynamicState = &dynamicStateInfo;
-	pipelineInfo.layout = pipelineLayout.getVKHandle();
+	pipelineInfo.layout = graphicsPipelineLayout.getVKHandle();
 	pipelineInfo.renderPass = renderPass.getVKHandle();
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = nullptr;
 	pipelineInfo.basePipelineIndex = -1;
 
-	graphicsPipeline = std::make_shared<vk::raii::Pipeline>(swapchain->getLogicalDevice()->getRaiiHandle()->createGraphicsPipeline(nullptr, pipelineInfo));
+	graphicsPipeline = std::make_shared<vk::raii::Pipeline>(swapchain->getLogicalDevice()->getVKRaiiHandle()->createGraphicsPipeline(nullptr, pipelineInfo));
 
 	swapchain->generateFBs(&renderPass);
 }

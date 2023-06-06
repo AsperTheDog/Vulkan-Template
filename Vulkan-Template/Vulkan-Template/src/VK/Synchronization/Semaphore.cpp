@@ -6,5 +6,5 @@ void Semaphore::commit(LogicalDevice* lDevice)
 {
 	vk::SemaphoreCreateInfo semaphoreInfo{};
 	
-	semaphore = std::make_shared<vk::raii::Semaphore>(*lDevice->getRaiiHandle(), semaphoreInfo);
+	semaphore = std::make_shared<vk::raii::Semaphore>(*lDevice->getVKRaiiHandle(), semaphoreInfo);
 }

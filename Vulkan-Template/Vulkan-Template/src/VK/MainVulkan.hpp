@@ -24,16 +24,16 @@ private:
 	Window window;
 	Instance instance;
 	Surface surface;
-	PhysicalDevice pDevice;
-	LogicalDevice lDevice;
+	PhysicalDevice physicalDevice;
+	LogicalDevice logicalDevice;
 	Swapchain swapchain;
-	GraphicsPipeline gPipeline;
-	CommandPool cPool;
-	CommandBuffers cBuffers;
+	GraphicsPipeline graphicsPipeline;
+	CommandPool commandPool;
+	CommandBuffers commandBuffers;
 	Semaphore imageAvailableSemaphore;
 	Semaphore renderFinishedSemaphore;
 	Fence inFlightFence;
 
 	bool findPhysicalDevice();
-	static bool isPDeviceSuitable(const PhysicalDevice& device);
+	bool isPDeviceSuitable(PhysicalDevice& device);
 };

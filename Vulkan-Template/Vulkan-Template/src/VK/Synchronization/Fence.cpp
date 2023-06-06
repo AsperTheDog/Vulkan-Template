@@ -3,20 +3,20 @@
 
 void Fence::commit(LogicalDevice* lDevice)
 {
-	this->lDevice = lDevice;
+	this->logicalDevice = lDevice;
 	vk::FenceCreateInfo fenceInfo{};
 	fenceInfo.flags = vk::FenceCreateFlagBits::eSignaled;
 
-	fence = std::make_shared<vk::raii::Fence>(*lDevice->getRaiiHandle(), fenceInfo);
+	fence = std::make_shared<vk::raii::Fence>(*lDevice->getVKRaiiHandle(), fenceInfo);
 }
 
 void Fence::wait()
 {
-	if (lDevice->getRaiiHandle()->waitForFences(**fence, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess)
+	if (logicalDevice->getVKRaiiHandle()->waitForFences(**fence, VK_TRUE, UINT64_MAX) != vk::Result::eSuccess)
 		throw std::runtime_error("Failed to wait for fence!");
 }
 
 void Fence::reset()
 {
-	lDevice->getRaiiHandle()->resetFences(**fence);
+	logicalDevice->getVKRaiiHandle()->resetFences(**fence);
 }

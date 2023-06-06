@@ -12,8 +12,8 @@ public:
 
 	void commit(LogicalDevice* lDevice);
 
-	std::shared_ptr<vk::raii::Semaphore> getRaiiHandle() const { return semaphore; }
-	VkSemaphore getVKHandle() const { return **semaphore; }
+	std::shared_ptr<vk::raii::Semaphore> getVKRaiiHandle() const { return semaphore; }
+	VkSemaphore getVKBaseHandle() const { return **semaphore; }
 
 private:
 	std::shared_ptr<vk::raii::Semaphore> semaphore;

@@ -11,7 +11,7 @@
 
 void Swapchain::commit(LogicalDevice* lDevice, Surface* surface)
 {
-    this->lDevice = lDevice;
+    this->logicalDevice = lDevice;
 
     // Query the formats and present modes of the swapchain
     auto formats = lDevice->getPhysicalDevice()->getSupportedFormats();
@@ -70,7 +70,7 @@ void Swapchain::commit(LogicalDevice* lDevice, Surface* surface)
     this->extent = vk::Extent2D(swapchainExtent.width, swapchainExtent.height);
     
     vk::SwapchainCreateInfoKHR swapchainCreateInfo{};
-    swapchainCreateInfo.surface = surface->getVKHandle();
+    swapchainCreateInfo.surface = surface->getVKBaseHandle();
     swapchainCreateInfo.minImageCount = capabilities.minImageCount + 1;
 
     // Make sure the image count is not greater than the maximum
@@ -84,13 +84,12 @@ void Swapchain::commit(LogicalDevice* lDevice, Surface* surface)
     swapchainCreateInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
     
     // Check if the swapchain needs to be shared between queues
-    FamilyQueueIndices indices = lDevice->getPhysicalDevice()->getQueueFamilyIndices();
-    uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
-    if (indices.graphicsFamily != indices.presentFamily)
+    auto queueFamilyIndices = lDevice->getPhysicalDevice()->getQueueFamilies()->getUniqueIndices();
+    if (queueFamilyIndices.size() > 1)
     {
         swapchainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-        swapchainCreateInfo.queueFamilyIndexCount = 2;
-        swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices;
+        swapchainCreateInfo.queueFamilyIndexCount = queueFamilyIndices.size();
+        swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
     }
     else
         swapchainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
@@ -101,7 +100,7 @@ void Swapchain::commit(LogicalDevice* lDevice, Surface* surface)
     swapchainCreateInfo.clipped = VK_TRUE;
     swapchainCreateInfo.oldSwapchain = nullptr;
     
-    this->swapchain = std::make_shared<vk::raii::SwapchainKHR>(*lDevice->getRaiiHandle(), swapchainCreateInfo);
+    this->swapchain = std::make_shared<vk::raii::SwapchainKHR>(*lDevice->getVKRaiiHandle(), swapchainCreateInfo);
     this->swapchainImages = swapchain->getImages();
 
     // Create the image views
@@ -120,7 +119,7 @@ void Swapchain::commit(LogicalDevice* lDevice, Surface* surface)
     for (auto image: swapchainImages)
     {
         imageViewCreateInfo.image = image;
-        swapchainImageViews.emplace_back(*lDevice->getRaiiHandle(), imageViewCreateInfo);
+        swapchainImageViews.emplace_back(*lDevice->getVKRaiiHandle(), imageViewCreateInfo);
     }
 }
 
@@ -136,14 +135,14 @@ void Swapchain::generateFBs(RenderPass* renderPass)
 
 FrameBuffer* Swapchain::getActiveFramebuffer()
 {
-    return &frameBuffers[imageIdx];
+    return &frameBuffers[imageIndex];
 }
 
 uint32_t Swapchain::acquireNextImage(Semaphore* sem)
 {
     auto [result, value] = swapchain->acquireNextImage(
         std::numeric_limits<uint64_t>::max(), 
-        sem->getVKHandle());
+        sem->getVKBaseHandle());
     if (result != vk::Result::eSuccess)
 		throw std::runtime_error("Failed to acquire next image");
     return value;
@@ -151,5 +150,5 @@ uint32_t Swapchain::acquireNextImage(Semaphore* sem)
 
 void Swapchain::setActiveIndex(uint32_t index)
 {
-    imageIdx = index;
+    imageIndex = index;
 }

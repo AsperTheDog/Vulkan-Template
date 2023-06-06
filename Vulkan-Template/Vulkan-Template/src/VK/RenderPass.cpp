@@ -39,7 +39,7 @@ void RenderPass::commit(GraphicsPipeline *gPipeline, Swapchain* swapchain)
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
 
-    renderPass = std::make_shared<vk::raii::RenderPass>(*swapchain->getLogicalDevice()->getRaiiHandle(), renderPassInfo);
+    renderPass = std::make_shared<vk::raii::RenderPass>(*swapchain->getLogicalDevice()->getVKRaiiHandle(), renderPassInfo);
 }
 
 void RenderPass::begin(vk::raii::CommandBuffer* cb)

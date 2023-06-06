@@ -11,6 +11,6 @@ void GraphicsPipelineLayout::commit(LogicalDevice* lDevice)
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
 	pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-	pipelineLayout = std::make_shared<vk::raii::PipelineLayout>(lDevice->getRaiiHandle()->createPipelineLayout(pipelineLayoutInfo));
+	pipelineLayout = std::make_shared<vk::raii::PipelineLayout>(lDevice->getVKRaiiHandle()->createPipelineLayout(pipelineLayoutInfo));
 
 }

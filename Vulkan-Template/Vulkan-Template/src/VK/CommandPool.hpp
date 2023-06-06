@@ -15,15 +15,15 @@ class CommandPool
 public:
     CommandPool() = default;
 
-    void commit(LogicalDevice* lDevice, FamilyQueueType type);
+    void commit(LogicalDevice* lDevice, FamilyQueueType type, int queueNumber);
     
-    std::shared_ptr<vk::raii::CommandPool> getRaiiHandle() const { return commandPool; }
-    VkCommandPool getVKHandle() const { return **commandPool; }
+    std::shared_ptr<vk::raii::CommandPool> getVKRaiiHandle() const { return commandPool; }
+    VkCommandPool getVKBaseHandle() const { return **commandPool; }
 
-    LogicalDevice* getLogicalDevice() const { return lDevice; }
+    LogicalDevice* getLogicalDevice() const { return logicalDevice; }
     
 private:
-    LogicalDevice* lDevice = nullptr;
+    LogicalDevice* logicalDevice = nullptr;
 
     std::shared_ptr<vk::raii::CommandPool> commandPool;
 };

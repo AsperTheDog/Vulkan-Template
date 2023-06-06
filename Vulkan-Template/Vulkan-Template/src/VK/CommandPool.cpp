@@ -6,18 +6,15 @@
 #include "PhysicalDevice.hpp"
 #include "LogicalDevice.hpp"
 
-void CommandPool::commit(LogicalDevice* lDevice, FamilyQueueType type)
+void CommandPool::commit(LogicalDevice* lDevice, FamilyQueueType type, int queueNumber)
 {
-    this->lDevice = lDevice;
+    this->logicalDevice = lDevice;
 
     vk::CommandPoolCreateInfo poolInfo{};
-    auto index = lDevice->getPhysicalDevice()->getQueueFamilyIndices().getIndex(type);
-
-    if (!index.has_value())
-        // If this happens, make sure the queue has been selected in PhysicalDevice.setQueuesToUse
-        throw std::runtime_error("Failed to find queue family index for type " + std::to_string(type));
-    poolInfo.queueFamilyIndex = index.value();
+    auto index = lDevice->getPhysicalDevice()->getQueueFamilies()->getQueues(type)[queueNumber];
+    
+    poolInfo.queueFamilyIndex = index.queue.index;
     poolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
     
-    commandPool = std::make_shared<vk::raii::CommandPool>(*lDevice->getRaiiHandle(), poolInfo);
+    commandPool = std::make_shared<vk::raii::CommandPool>(*lDevice->getVKRaiiHandle(), poolInfo);
 }

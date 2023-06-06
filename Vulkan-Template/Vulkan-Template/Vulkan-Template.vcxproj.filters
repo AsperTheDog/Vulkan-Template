@@ -63,6 +63,9 @@
     <ClCompile Include="src\VK\GraphicsPipelineLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\VK\QueueFamilies.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\VK\CommandBuffers.hpp">
@@ -108,6 +111,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\VK\GraphicsPipelineLayout.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VK\QueueFamilies.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
