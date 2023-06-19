@@ -20,6 +20,7 @@ namespace svk {
 
 		void addLayer(const char* layer);
 		void addExtension(const char* extension);
+		bool areAddedExtensionsSupported();
 
 		void setAppName(std::string name) { this->appName = std::move(name); }
 		void setAppVersion(uint32_t version) { this->appVersion = version; }

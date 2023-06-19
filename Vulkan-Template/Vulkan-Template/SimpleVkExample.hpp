@@ -33,6 +33,10 @@ private:
 	svk::QueuePosition presentQueue{};
 	svk::QueuePosition computeQueue{};
 
+	std::vector<const char*> requiredExts = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
+
 	void initInstance()
 	{
 #ifdef _DEBUG
@@ -40,7 +44,17 @@ private:
 #endif
 
 		auto requiredExts = window.getRequiredExtensions();
-		for (auto ext : requiredExts) instance.addExtension(ext);
+		for (auto ext : requiredExts)
+		{
+			instance.addExtension(ext);
+			std::cout << " - Added instance extension: " << ext << "\n";
+		}
+
+		if (!instance.areAddedExtensionsSupported())
+		{
+			throw std::runtime_error("Required extensions are not supported");
+		}
+		std::cout << "All required extensions are supported\n";
 
 		instance.setAppName("SimpleVk Example");
 		instance.commit(svk::V_1_3);
@@ -102,8 +116,27 @@ private:
 			}
 			std::cout << " - Device contains a queue family that supports presentation\n";
 
+			if (!device.areExtensionsSupported(requiredExts))
+			{
+				std::cout << " - UNSUITABLE: Device does not support the necessary extensions\n";
+				continue;
+			}
+			std::cout << " - Device supports all necessary extensions\n";
+
 			physicalDevice = &device;
 			break;
+		}
+
+		auto surfaceProperties = physicalDevice->getSurfaceProperties(window.getSurface());
+		// Print all properties
+		std::cout << "\nSurface properties:\n";
+		for (auto prop : surfaceProperties.formats)
+		{
+			std::cout << " - Format: " << std::to_string(prop.format) << ", colorSpace: " << std::to_string(prop.colorSpace) << "\n";
+		}
+		for (auto prop : surfaceProperties.presentModes)
+		{
+			std::cout << " - Present mode: " << std::to_string(prop) << "\n";
 		}
 
 		std::cout << "Device is suitable, selected for use\n";
@@ -115,7 +148,8 @@ private:
 		logicalDevice.addValidationLayers();
 #endif
 
-		logicalDevice.addExtension(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+		for (auto& ext : requiredExts)
+			logicalDevice.addExtension(ext);
 
 		auto queues = physicalDevice->getQueueFamilies();
 		svk::QueueFamily* graphicsQueueFamily = nullptr;

@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 namespace svk
@@ -29,6 +30,13 @@ namespace svk
 		{
 			return other.index == this->index && other.offset == this->offset;
 		}
+	};
+
+	struct SurfaceProperties
+	{
+		VkSurfaceCapabilitiesKHR capabilities{};
+		std::vector<VkSurfaceFormatKHR> formats{};
+		std::vector<VkPresentModeKHR> presentModes{};
 	};
 }
 

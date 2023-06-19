@@ -13,10 +13,14 @@ namespace svk {
 	public:
 		PhysicalDevice() = delete;
 
+		bool areExtensionsSupported(std::vector<const char*> exts);
+		bool isExtensionSupported(const char* ext);
+
 		VkPhysicalDeviceProperties getProperties() const;
 		VkPhysicalDeviceFeatures getFeatures() const;
 		VkPhysicalDeviceMemoryProperties getMemoryProperties() const;
 		std::vector<QueueFamily> getQueueFamilies() const;
+		SurfaceProperties getSurfaceProperties(const Surface& surface) const;
 		uint32_t getID() const { return id; }
 		VkPhysicalDevice getVKHandle() const { return vkHandle; }
 

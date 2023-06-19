@@ -35,7 +35,7 @@ namespace svk
 			info.enabledLayerCount = static_cast<uint32_t>(this->layers.size());
 			info.ppEnabledLayerNames = layers.data();
 		}
-		
+
 		if (vkCreateInstance(&info, nullptr, &this->vkHandle) != VK_SUCCESS)
 			throw std::runtime_error("Error while creating instance!");
 
@@ -43,11 +43,11 @@ namespace svk
 		vkEnumeratePhysicalDevices(this->vkHandle, &count, nullptr);
 		std::vector<VkPhysicalDevice> devices(count);
 		vkEnumeratePhysicalDevices(this->vkHandle, &count, devices.data());
-		
+
 		this->physicalDevices.reserve(count);
 		for (auto& vkDevice : devices)
 		{
-			PhysicalDevice pDevice{vkDevice};
+			PhysicalDevice pDevice{ vkDevice };
 			this->physicalDevices.push_back(pDevice);
 		}
 	}
@@ -70,6 +70,27 @@ namespace svk
 		for (auto& existing : this->extensions)
 			if (existing == extension) return;
 		this->extensions.push_back(extension);
+	}
+
+	bool Instance::areAddedExtensionsSupported()
+	{
+		uint32_t extensionCount = 0;
+		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, availableExtensions.data());
+		
+		std::vector<const char*> tmpExtensions(this->extensions.begin(), this->extensions.end());
+
+		for (const auto& availableExtension : availableExtensions) {
+			for (const auto& addedExtension : this->extensions)
+			{
+				if (strcmp(addedExtension, availableExtension.extensionName) == 0)
+				{
+					tmpExtensions.erase(std::ranges::find(tmpExtensions, addedExtension));
+				}
+			}
+		}
+		return tmpExtensions.empty();
 	}
 
 	std::vector<PhysicalDevice>* Instance::getPhysicalDevices()

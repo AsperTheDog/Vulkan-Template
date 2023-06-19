@@ -4,13 +4,6 @@
 #include "SimpleVk_core.hpp"
 
 namespace svk {
-	struct SurfaceProperties
-	{
-		VkSurfaceCapabilitiesKHR capabilities{};
-		std::vector<VkSurfaceFormatKHR> formats{};
-		std::vector<VkPresentModeKHR> presentModes{};
-	};
-
 	class Surface
 	{
 	public:
