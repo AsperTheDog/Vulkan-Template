@@ -15,99 +15,60 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\VK\CommandBuffers.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VK\CommandPool.cpp">
+    <ClCompile Include="src\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VK\FrameBuffer.cpp">
+    <ClCompile Include="src\Instance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VK\GraphicsPipeline.cpp">
+    <ClCompile Include="src\PhysicalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VK\Instance.cpp">
+    <ClCompile Include="src\Surface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VK\LogicalDevice.cpp">
+    <ClCompile Include="src\LogicalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VK\MainVulkan.cpp">
+    <ClCompile Include="src\Queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VK\PhysicalDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VK\RenderPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VK\Surface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VK\Swapchain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SDL\Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VK\Synchronization\Semaphore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VK\Synchronization\Fence.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VK\GraphicsPipelineLayout.cpp">
+    <ClCompile Include="src\Swapchain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\VK\CommandBuffers.hpp">
+    <ClInclude Include="include\SimpleVk_core.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\CommandPool.hpp">
+    <ClInclude Include="include\Window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\FrameBuffer.hpp">
+    <ClInclude Include="include\SimpleVk.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\GraphicsPipeline.hpp">
+    <ClInclude Include="include\Instance.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\Instance.hpp">
+    <ClInclude Include="SimpleVkExample.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\LogicalDevice.hpp">
+    <ClInclude Include="include\PhysicalDevice.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\MainVulkan.hpp">
+    <ClInclude Include="include\Surface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\PhysicalDevice.hpp">
+    <ClInclude Include="include\LogicalDevice.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\RenderPass.hpp">
+    <ClInclude Include="include\Queue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VK\Surface.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VK\Swapchain.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\SDL\Window.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VK\Synchronization\Semaphore.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VK\Synchronization\Fence.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VK\GraphicsPipelineLayout.hpp">
+    <ClInclude Include="include\Swapchain.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

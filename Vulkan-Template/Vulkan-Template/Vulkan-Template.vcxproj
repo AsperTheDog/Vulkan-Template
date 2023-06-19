@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)/Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -126,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)/Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -140,7 +140,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\LogicalDevice.cpp" />
+    <ClCompile Include="src\PhysicalDevice.cpp" />
+    <ClCompile Include="src\Instance.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\Queue.cpp" />
+    <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="src\Surface.cpp" />
+    <ClCompile Include="src\Swapchain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Queue.hpp" />
+    <ClInclude Include="include\SimpleVk_core.hpp" />
+    <ClInclude Include="include\Instance.hpp" />
+    <ClInclude Include="include\PhysicalDevice.hpp" />
+    <ClInclude Include="include\LogicalDevice.hpp" />
+    <ClInclude Include="include\Window.hpp" />
+    <ClInclude Include="include\SimpleVk.hpp" />
+    <ClInclude Include="SimpleVkExample.hpp" />
+    <ClInclude Include="include\Surface.hpp" />
+    <ClInclude Include="include\Swapchain.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
