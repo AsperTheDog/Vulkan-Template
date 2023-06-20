@@ -17,8 +17,8 @@ namespace svk
 
 		void commit(PhysicalDevice* pDevice);
 
-		QueuePosition addQueues(QueueFamily* pQueueFamily, uint32_t queueCount, std::vector<float> pQueuePriorities);
-		QueuePosition addSingleQueue(QueueFamily* pQueueFamily, float priority);
+		QueuePosition addQueues(QueueFamily pQueueFamily, uint32_t queueCount, std::vector<float> pQueuePriorities);
+		QueuePosition addSingleQueue(QueueFamily pQueueFamily, float priority);
 		void setEnabledFeatures(VkPhysicalDeviceFeatures features){ enabledFeatures = features; }
 
 		void addExtension(const char* extension);
@@ -28,7 +28,7 @@ namespace svk
 	private:
 		struct QueueCreateInfo
 		{
-			QueueFamily* pQueueFamily;
+			QueueFamily queueFamily;
 			uint32_t queueCount;
 			std::vector<float> pQueuePriorities;
 		};

@@ -21,6 +21,7 @@ public:
 		this->getLogicalDevice();
 		std::cout << "\n";
 		this->getSwapchain();
+		std::cout << "\n";
 	}
 
 private:
@@ -28,6 +29,7 @@ private:
 	svk::Window window;
 	svk::PhysicalDevice* physicalDevice{};
 	svk::LogicalDevice logicalDevice;
+	svk::Swapchain swapchain;
 
 	svk::QueuePosition graphicsQueue{};
 	svk::QueuePosition presentQueue{};
@@ -57,9 +59,9 @@ private:
 		std::cout << "All required extensions are supported\n";
 
 		instance.setAppName("SimpleVk Example");
-		instance.commit(svk::V_1_3);
+		instance.commit(svk::VulkanApiVersion::V_1_3);
 
-		std::cout << "Created instance (using version " << svk::V_1_3 << ")\n";
+		std::cout << "Created instance (using version 1.3.0)\n";
 	}
 
 	void createSurface()
@@ -85,17 +87,24 @@ private:
 
 			if (properties.apiVersion < instance.getApiVersion())
 			{
-				std::cout << " - UNSUITABLE: Device does not support Vulkan " << instance.getApiVersion() << "\n";
-				continue;
-			}
-			std::cout << " - Device supports Vulkan " << instance.getApiVersion() << "\n";
 
-			if (!window.getSurface().isDeviceCompatible(&device))
-			{
-				std::cout << " - UNSUITABLE: Device is not compatible with the current surface\n";
+				std::string api = std::to_string(VK_VERSION_MAJOR(instance.getApiVersion()))
+					+ "." + std::to_string(VK_VERSION_MINOR(instance.getApiVersion()))
+					+ "." + std::to_string(VK_VERSION_PATCH(instance.getApiVersion()));
+				std::cout << " - UNSUITABLE: Device does not support Vulkan " << api << "\n";
 				continue;
 			}
-			std::cout << " - Device is compatible with the current surface\n";
+			std::string api = std::to_string(VK_VERSION_MAJOR(properties.apiVersion))
+				+ "." + std::to_string(VK_VERSION_MINOR(properties.apiVersion))
+				+ "." + std::to_string(VK_VERSION_PATCH(properties.apiVersion));
+			std::cout << " - Device supports Vulkan " << api << "\n";
+
+			if (!device.areExtensionsSupported(requiredExts))
+			{
+				std::cout << " - UNSUITABLE: Device does not support the necessary extensions\n";
+				continue;
+			}
+			std::cout << " - Device supports all necessary extensions\n";
 
 			bool types[4];
 			types[svk::QueueFamilyTypes::GRAPHICS] = true;
@@ -116,27 +125,27 @@ private:
 			}
 			std::cout << " - Device contains a queue family that supports presentation\n";
 
-			if (!device.areExtensionsSupported(requiredExts))
+			if (!device.isFormatSupported(window.getSurface(), { VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR }))
 			{
-				std::cout << " - UNSUITABLE: Device does not support the necessary extensions\n";
+				std::cout << " - UNSUITABLE: Device does not support desired formats\n";
 				continue;
 			}
-			std::cout << " - Device supports all necessary extensions\n";
+			std::cout << " - Device supports desired formats\n";
+
+			if (!device.isPresentModeSupported(window.getSurface(), VK_PRESENT_MODE_MAILBOX_KHR))
+			{
+				std::cout << " - UNSUITABLE: Device does not support desired present mode\n";
+				continue;
+			}
+			std::cout << " - Device supports desired present mode\n";
 
 			physicalDevice = &device;
 			break;
 		}
 
-		auto surfaceProperties = physicalDevice->getSurfaceProperties(window.getSurface());
-		// Print all properties
-		std::cout << "\nSurface properties:\n";
-		for (auto prop : surfaceProperties.formats)
+		if (physicalDevice == nullptr)
 		{
-			std::cout << " - Format: " << std::to_string(prop.format) << ", colorSpace: " << std::to_string(prop.colorSpace) << "\n";
-		}
-		for (auto prop : surfaceProperties.presentModes)
-		{
-			std::cout << " - Present mode: " << std::to_string(prop) << "\n";
+			throw std::runtime_error("No suitable physical device found");
 		}
 
 		std::cout << "Device is suitable, selected for use\n";
@@ -152,36 +161,40 @@ private:
 			logicalDevice.addExtension(ext);
 
 		auto queues = physicalDevice->getQueueFamilies();
-		svk::QueueFamily* graphicsQueueFamily = nullptr;
-		svk::QueueFamily* presentQueueFamily = nullptr;
-		svk::QueueFamily* computeQueueFamily = nullptr;
+		std::optional<svk::QueueFamily> graphicsQueueFamily{};
+		std::optional<svk::QueueFamily> presentQueueFamily{};
+		std::optional<svk::QueueFamily> computeQueueFamily{};
 		for (auto& queue : queues)
 		{
-			if (queue.types[svk::QueueFamilyTypes::GRAPHICS] && graphicsQueueFamily == nullptr)
+			if (queue.types[svk::QueueFamilyTypes::GRAPHICS] && !graphicsQueueFamily.has_value())
 			{
 				std::cout << "Found graphics queue family with index " << queue.index << "\n";
-				graphicsQueueFamily = &queue;
+				graphicsQueueFamily = std::make_optional(queue);
 			}
-			if (queue.supportsPresent(&window.getSurface()) && presentQueueFamily == nullptr)
+			if (queue.supportsPresent(&window.getSurface()) && !presentQueueFamily.has_value())
 			{
 				std::cout << "Found present queue family with index " << queue.index << "\n";
-				presentQueueFamily = &queue;
+				presentQueueFamily = std::make_optional(queue);
 			}
-			if (queue.types[svk::QueueFamilyTypes::COMPUTE] && computeQueueFamily == nullptr)
+			if (queue.types[svk::QueueFamilyTypes::COMPUTE] && !computeQueueFamily.has_value())
 			{
 				std::cout << "Found compute queue family with index " << queue.index << "\n";
-				computeQueueFamily = &queue;
+				computeQueueFamily = std::make_optional(queue);
 			}
 		}
+		
+		if (!graphicsQueueFamily.has_value() || !presentQueueFamily.has_value() || !computeQueueFamily.has_value())
+			throw std::runtime_error("Failed to find all required queue families");
 
-		graphicsQueue = logicalDevice.addSingleQueue(graphicsQueueFamily, 1.0f);
 
-		if (presentQueueFamily == graphicsQueueFamily) presentQueue = graphicsQueue;
-		else presentQueue = logicalDevice.addSingleQueue(presentQueueFamily, 1.0f);
+		graphicsQueue = logicalDevice.addSingleQueue(*graphicsQueueFamily, 1.0f);
 
-		if (computeQueueFamily == graphicsQueueFamily) computeQueue = graphicsQueue;
-		else if (computeQueueFamily == presentQueueFamily) computeQueue = presentQueue;
-		else computeQueue = logicalDevice.addSingleQueue(computeQueueFamily, 1.0f);
+		if (presentQueueFamily.value().index == graphicsQueueFamily.value().index) presentQueue = graphicsQueue;
+		else presentQueue = logicalDevice.addSingleQueue(*presentQueueFamily, 1.0f);
+
+		if (computeQueueFamily.value().index == graphicsQueueFamily.value().index) computeQueue = graphicsQueue;
+		else if (computeQueueFamily.value().index == presentQueueFamily.value().index) computeQueue = presentQueue;
+		else computeQueue = logicalDevice.addSingleQueue(*computeQueueFamily, 1.0f);
 
 		logicalDevice.commit(physicalDevice);
 		std::cout << "Created logical device\n";
@@ -189,14 +202,17 @@ private:
 
 	void getSwapchain()
 	{
-		
+		swapchain.setDesiredFormat(VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+		swapchain.setDesiredPresentMode(VK_PRESENT_MODE_MAILBOX_KHR);
+		swapchain.setExtent(findSwapchainExtent());
+
 	}
 
 	// ASSIST FUNCTIONS
 
 	static bool doesDeviceSupportQueueFamilyTypes(svk::PhysicalDevice* device, bool types[4])
 	{
-		bool tmpTypes[4] = {types[0], types[1], types[2], types[3]};
+		bool tmpTypes[4] = { types[0], types[1], types[2], types[3] };
 		auto queueFamilies = device->getQueueFamilies();
 		for (auto& queueFamily : queueFamilies)
 		{
@@ -218,6 +234,26 @@ private:
 				return true;
 		}
 		return false;
+	}
+
+	VkExtent2D findSwapchainExtent()
+	{
+		auto capabilities = window.getSurface().getProperties(physicalDevice).capabilities;
+		if (capabilities.currentExtent.width != UINT32_MAX)
+			return capabilities.currentExtent;
+
+		auto size = window.getSize();
+		VkExtent2D extent = { size.height, size.width };
+
+		extent.width = std::clamp(extent.width,
+			capabilities.minImageExtent.width,
+			capabilities.maxImageExtent.width);
+
+		extent.height = std::clamp(extent.height,
+			capabilities.minImageExtent.height,
+			capabilities.maxImageExtent.height);
+
+		return extent;
 	}
 };
 

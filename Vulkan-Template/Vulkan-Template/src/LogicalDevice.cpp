@@ -24,7 +24,7 @@ namespace svk
 			queueCreateInfos.push_back({});
 			auto& queueCreateInfo = queueCreateInfos.back();
 			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queueCreateInfo.queueFamilyIndex = queue.pQueueFamily->index;
+			queueCreateInfo.queueFamilyIndex = queue.queueFamily.index;
 			queueCreateInfo.queueCount = queue.queueCount;
 			queueCreateInfo.pQueuePriorities = queue.pQueuePriorities.data();
 		}
@@ -49,14 +49,14 @@ namespace svk
 		{
 			for (uint32_t i = 0; i < queue.queueCount; i++)
 			{
-				generateQueue({queue.pQueueFamily->index, i});
+				generateQueue({queue.queueFamily.index, i});
 			}
 		}
 	}
 
-	QueuePosition LogicalDevice::addQueues(QueueFamily* pQueueFamily, uint32_t queueCount, std::vector<float> pQueuePriorities)
+	QueuePosition LogicalDevice::addQueues(QueueFamily pQueueFamily, uint32_t queueCount, std::vector<float> pQueuePriorities)
 	{
-		uint32_t existingQueuePos = getQueuePosFromIndex(pQueueFamily->index);
+		uint32_t existingQueuePos = getQueuePosFromIndex(pQueueFamily.index);
 		if (existingQueuePos >= queues.size())
 		{
 			queues.emplace_back(pQueueFamily, queueCount, pQueuePriorities);
@@ -69,9 +69,9 @@ namespace svk
 		return {existingQueuePos, qPos};
 	}
 
-	QueuePosition LogicalDevice::addSingleQueue(QueueFamily* pQueueFamily, float priority)
+	QueuePosition LogicalDevice::addSingleQueue(QueueFamily pQueueFamily, float priority)
 	{
-		uint32_t existingQueuePos = getQueuePosFromIndex(pQueueFamily->index);
+		uint32_t existingQueuePos = getQueuePosFromIndex(pQueueFamily.index);
 		if (existingQueuePos >= queues.size())
 		{
 			std::vector<float> priorities = {priority};
@@ -87,7 +87,7 @@ namespace svk
 	{
 		for (uint32_t i = 0; i < queues.size(); i++)
 		{
-			if (queues[i].pQueueFamily->index == familyIndex)
+			if (queues[i].queueFamily.index == familyIndex)
 				return i;
 		}
 		return UINT32_MAX;

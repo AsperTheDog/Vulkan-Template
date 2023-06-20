@@ -1,7 +1,5 @@
 #include "Surface.hpp"
 
-#include <iostream>
-
 namespace svk
 {
 	Surface::Surface(VkSurfaceKHR surface, Instance* instance) : vkHandle(surface), instance(instance){}
@@ -10,43 +8,29 @@ namespace svk
 	{
 		vkDestroySurfaceKHR(instance->getVkHandle(), vkHandle, nullptr);
 	}
-
-	bool Surface::isDeviceCompatible(PhysicalDevice* device) const
+	
+	SurfaceProperties Surface::getProperties(const PhysicalDevice* device) const
 	{
 		SurfaceProperties properties;
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->vkHandle, this->vkHandle, &properties.capabilities);
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->getVKHandle(), vkHandle, &properties.capabilities);
 
 		uint32_t formatCount;
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device->vkHandle, this->vkHandle, &formatCount, nullptr);
-		properties.formats.resize(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device->vkHandle, this->vkHandle, &formatCount, properties.formats.data());
-
-		uint32_t presentCount;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device->vkHandle, this->vkHandle, &presentCount, nullptr);
-		properties.presentModes.resize(presentCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device->vkHandle, this->vkHandle, &presentCount, properties.presentModes.data());
-
-		// Check the device supports swapchain
-		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties(device->vkHandle, nullptr, &extensionCount, nullptr);
-		std::vector<VkExtensionProperties> extensionProperties{extensionCount};
-		vkEnumerateDeviceExtensionProperties(device->vkHandle, nullptr, &extensionCount, extensionProperties.data());
-
-		bool foundSwapchain = false;
-		for (auto& extensionProperty : extensionProperties)
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device->getVKHandle(), vkHandle, &formatCount, nullptr);
+		if (formatCount != 0)
 		{
-			if (strcmp(extensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
-			{
-				// Check that the swapchain supports at least one format and one present mode
-				if (properties.formats.empty() || properties.presentModes.empty())
-					continue;
-
-				foundSwapchain = true;
-				break;
-			}
+			properties.formats.resize(formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(device->getVKHandle(), vkHandle, &formatCount, properties.formats.data());
 		}
 
-		return foundSwapchain;
+		uint32_t presentModeCount;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device->getVKHandle(), vkHandle, &presentModeCount, nullptr);
+		if (presentModeCount != 0)
+		{
+			properties.presentModes.resize(presentModeCount);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(device->getVKHandle(), vkHandle, &presentModeCount, properties.presentModes.data());
+		}
+		
+		return properties;
 	}
 
 	void Surface::reset(VkSurfaceKHR vk_surface, Instance* instance)

@@ -15,6 +15,8 @@ namespace svk {
 
 		bool areExtensionsSupported(std::vector<const char*> exts);
 		bool isExtensionSupported(const char* ext);
+		bool isFormatSupported(const Surface& surface, VkSurfaceFormatKHR format);
+		bool isPresentModeSupported(const Surface& surface, VkPresentModeKHR presentMode);
 
 		VkPhysicalDeviceProperties getProperties() const;
 		VkPhysicalDeviceFeatures getFeatures() const;

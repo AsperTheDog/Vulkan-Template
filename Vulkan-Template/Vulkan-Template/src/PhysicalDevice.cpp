@@ -37,6 +37,28 @@ namespace svk
 		return false;
 	}
 
+	bool PhysicalDevice::isFormatSupported(const Surface& surface, VkSurfaceFormatKHR format)
+	{
+		auto surfaceProperties = surface.getProperties(this);
+		for (auto& availableFormat : surfaceProperties.formats)
+		{
+			if (availableFormat.format == format.format && availableFormat.colorSpace == format.colorSpace)
+				return true;
+		}
+		return false;
+	}
+
+	bool PhysicalDevice::isPresentModeSupported(const Surface& surface, VkPresentModeKHR presentMode)
+	{
+		auto surfaceProperties = surface.getProperties(this);
+		for (auto& availableMode : surfaceProperties.presentModes)
+		{
+			if (availableMode == presentMode)
+				return true;
+		}
+		return false;
+	}
+
 	VkPhysicalDeviceProperties PhysicalDevice::getProperties() const
 	{
 		VkPhysicalDeviceProperties properties;
@@ -76,26 +98,7 @@ namespace svk
 
 	SurfaceProperties PhysicalDevice::getSurfaceProperties(const Surface& surface) const
 	{
-		SurfaceProperties properties;
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkHandle, surface.getVKHandle(), &properties.capabilities);
-
-		uint32_t formatCount;
-		vkGetPhysicalDeviceSurfaceFormatsKHR(vkHandle, surface.getVKHandle(), &formatCount, nullptr);
-		if (formatCount != 0)
-		{
-			properties.formats.resize(formatCount);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(vkHandle, surface.getVKHandle(), &formatCount, properties.formats.data());
-		}
-
-		uint32_t presentModeCount;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(vkHandle, surface.getVKHandle(), &presentModeCount, nullptr);
-		if (presentModeCount != 0)
-		{
-			properties.presentModes.resize(presentModeCount);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(vkHandle, surface.getVKHandle(), &presentModeCount, properties.presentModes.data());
-		}
-
-		return properties;
+		return surface.getProperties(this);
 	}
 
 	PhysicalDevice::PhysicalDevice(VkPhysicalDevice device) : vkHandle(device), id(s_idCounter)
