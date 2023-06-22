@@ -15,15 +15,10 @@ public:
 	{
 		std::cout << "Initiated window\n\n";
 		this->initInstance();
-		std::cout << "\n";
 		this->createSurface();
-		std::cout << "\n";
 		this->getPhysicalDevice();
-		std::cout << "\n";
 		this->getLogicalDevice();
-		std::cout << "\n";
 		this->getSwapchain();
-		std::cout << "\n";
 	}
 
 private:
@@ -64,13 +59,13 @@ private:
 		instance.setAppName("SimpleVk Example");
 		instance.commit(svk::VulkanApiVersion::V_1_3);
 
-		std::cout << "Created instance (using version 1.3.0)\n";
+		std::cout << "Created instance (using version 1.3.0)\n\n";
 	}
 
 	void createSurface()
 	{
 		window.createSurface(&instance);
-		std::cout << "Created surface\n";
+		std::cout << "Created surface\n\n";
 	}
 
 	void getPhysicalDevice()
@@ -146,7 +141,7 @@ private:
 			throw std::runtime_error("No suitable physical device found");
 		}
 
-		std::cout << "Device is suitable, selected for use\n";
+		std::cout << "Device is suitable, selected for use\n\n";
 	}
 
 	void getLogicalDevice()
@@ -204,7 +199,7 @@ private:
 		}
 
 		logicalDevice.commit(physicalDevice);
-		std::cout << "Created logical device\n";
+		std::cout << "Created logical device\n\n";
 	}
 
 	void getSwapchain()
@@ -235,7 +230,7 @@ private:
 		swapchain.setClipped(true);
 
 		swapchain.commit(logicalDevice, window.getSurface());
-		std::cout << "Created swapchain\n";
+		std::cout << "Created swapchain\n\n";
 	}
 
 	// ASSIST FUNCTIONS
