@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include <vulkan/vk_enum_string_helper.h>
+
 #include "SimpleVk.hpp"
 #include "Window.hpp"
 
@@ -34,6 +36,7 @@ private:
 	svk::QueuePosition graphicsQueue{};
 	svk::QueuePosition presentQueue{};
 	svk::QueuePosition computeQueue{};
+	uint8_t uniqueQueueNum = 0;
 
 	std::vector<const char*> requiredExts = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -80,18 +83,17 @@ private:
 
 			if (properties.deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 			{
-				std::cout << " - UNSUITABLE: Device is not a discrete GPU\n";
+				std::cerr << " - UNSUITABLE: Device is not a discrete GPU\n";
 				continue;
 			}
 			std::cout << " - Device is a discrete GPU\n";
 
 			if (properties.apiVersion < instance.getApiVersion())
 			{
-
 				std::string api = std::to_string(VK_VERSION_MAJOR(instance.getApiVersion()))
 					+ "." + std::to_string(VK_VERSION_MINOR(instance.getApiVersion()))
 					+ "." + std::to_string(VK_VERSION_PATCH(instance.getApiVersion()));
-				std::cout << " - UNSUITABLE: Device does not support Vulkan " << api << "\n";
+				std::cerr << " - UNSUITABLE: Device does not support Vulkan " << api << "\n";
 				continue;
 			}
 			std::string api = std::to_string(VK_VERSION_MAJOR(properties.apiVersion))
@@ -101,40 +103,36 @@ private:
 
 			if (!device.areExtensionsSupported(requiredExts))
 			{
-				std::cout << " - UNSUITABLE: Device does not support the necessary extensions\n";
+				std::cerr << " - UNSUITABLE: Device does not support the necessary extensions\n";
 				continue;
 			}
 			std::cout << " - Device supports all necessary extensions\n";
 
-			bool types[4];
-			types[svk::QueueFamilyTypes::GRAPHICS] = true;
-			types[svk::QueueFamilyTypes::COMPUTE] = true;
-			types[svk::QueueFamilyTypes::TRANSFER] = false;
-			types[svk::QueueFamilyTypes::BINDING] = false;
+			svk::QueueTypeSupport types {true, true, false, false};
 			if (!doesDeviceSupportQueueFamilyTypes(&device, types))
 			{
-				std::cout << " - UNSUITABLE: Device does not support required queue family types\n";
+				std::cerr << " - UNSUITABLE: Device does not support required queue family types\n";
 				continue;
 			}
 			std::cout << " - Device supports required queue family types\n";
 
 			if (!doesDeviceContainPresentQueue(&device))
 			{
-				std::cout << " - UNSUITABLE: Device does not contain a queue family that supports presentation\n";
+				std::cerr << " - UNSUITABLE: Device does not contain a queue family that supports presentation\n";
 				continue;
 			}
 			std::cout << " - Device contains a queue family that supports presentation\n";
 
 			if (!device.isFormatSupported(window.getSurface(), { VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR }))
 			{
-				std::cout << " - UNSUITABLE: Device does not support desired formats\n";
+				std::cerr << " - UNSUITABLE: Device does not support desired formats\n";
 				continue;
 			}
 			std::cout << " - Device supports desired formats\n";
 
 			if (!device.isPresentModeSupported(window.getSurface(), VK_PRESENT_MODE_MAILBOX_KHR))
 			{
-				std::cout << " - UNSUITABLE: Device does not support desired present mode\n";
+				std::cerr << " - UNSUITABLE: Device does not support desired present mode\n";
 				continue;
 			}
 			std::cout << " - Device supports desired present mode\n";
@@ -166,7 +164,7 @@ private:
 		std::optional<svk::QueueFamily> computeQueueFamily{};
 		for (auto& queue : queues)
 		{
-			if (queue.types[svk::QueueFamilyTypes::GRAPHICS] && !graphicsQueueFamily.has_value())
+			if (queue.types.graphics && !graphicsQueueFamily.has_value())
 			{
 				std::cout << "Found graphics queue family with index " << queue.index << "\n";
 				graphicsQueueFamily = std::make_optional(queue);
@@ -176,7 +174,7 @@ private:
 				std::cout << "Found present queue family with index " << queue.index << "\n";
 				presentQueueFamily = std::make_optional(queue);
 			}
-			if (queue.types[svk::QueueFamilyTypes::COMPUTE] && !computeQueueFamily.has_value())
+			if (queue.types.compute && !computeQueueFamily.has_value())
 			{
 				std::cout << "Found compute queue family with index " << queue.index << "\n";
 				computeQueueFamily = std::make_optional(queue);
@@ -188,13 +186,22 @@ private:
 
 
 		graphicsQueue = logicalDevice.addSingleQueue(*graphicsQueueFamily, 1.0f);
+		uniqueQueueNum++;
 
 		if (presentQueueFamily.value().index == graphicsQueueFamily.value().index) presentQueue = graphicsQueue;
-		else presentQueue = logicalDevice.addSingleQueue(*presentQueueFamily, 1.0f);
+		else
+		{
+			presentQueue = logicalDevice.addSingleQueue(*presentQueueFamily, 1.0f);
+			uniqueQueueNum++;
+		}
 
 		if (computeQueueFamily.value().index == graphicsQueueFamily.value().index) computeQueue = graphicsQueue;
 		else if (computeQueueFamily.value().index == presentQueueFamily.value().index) computeQueue = presentQueue;
-		else computeQueue = logicalDevice.addSingleQueue(*computeQueueFamily, 1.0f);
+		else
+		{
+			computeQueue = logicalDevice.addSingleQueue(*computeQueueFamily, 1.0f);
+			uniqueQueueNum++;
+		}
 
 		logicalDevice.commit(physicalDevice);
 		std::cout << "Created logical device\n";
@@ -202,27 +209,48 @@ private:
 
 	void getSwapchain()
 	{
+		auto desiredExtent = findSwapchainExtent();
+		auto desiredImageCount = findSwapchainImgCount();
+		auto desiredPreTransform = window.getSurface().getProperties(physicalDevice).capabilities.currentTransform;
+
 		swapchain.setDesiredFormat(VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
 		swapchain.setDesiredPresentMode(VK_PRESENT_MODE_MAILBOX_KHR);
-		swapchain.setExtent(findSwapchainExtent());
+		swapchain.setExtent(desiredExtent);
+		std::cout << "Swapchain extent set to " << desiredExtent.width << "x" << desiredExtent.height << "\n";
+		swapchain.setImageCount(desiredImageCount);
+		std::cout << "Swapchain image count set to " << desiredImageCount << "\n";
+		if (uniqueQueueNum < 2)
+		{
+			swapchain.setQueueMode(svk::QueueModes::EXCLUSIVE);
+			std::cout << "Swapchain queue mode set to EXCLUSIVE for 1 or less queues\n";
+		}
+		else
+		{
+			swapchain.setQueueMode(svk::QueueModes::CONCURRENT);
+			std::cout << "Swapchain queue mode set to CONCURRENT for " << (uint32_t)uniqueQueueNum << " queues\n";
+		}
+		swapchain.setPreTransform(desiredPreTransform);
+		std::cout << "Swapchain Pre transform set to " << string_VkSurfaceTransformFlagBitsKHR(desiredPreTransform) << "\n";
+		swapchain.setCompositeAlpha(VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR);
+		swapchain.setClipped(true);
 
+		swapchain.commit(logicalDevice, window.getSurface());
+		std::cout << "Created swapchain\n";
 	}
 
 	// ASSIST FUNCTIONS
 
-	static bool doesDeviceSupportQueueFamilyTypes(svk::PhysicalDevice* device, bool types[4])
+	static bool doesDeviceSupportQueueFamilyTypes(svk::PhysicalDevice* device, svk::QueueTypeSupport types)
 	{
-		bool tmpTypes[4] = { types[0], types[1], types[2], types[3] };
 		auto queueFamilies = device->getQueueFamilies();
 		for (auto& queueFamily : queueFamilies)
 		{
-			for (int i = 0; i < 4; i++)
-			{
-				if (tmpTypes[i] && queueFamily.types[i])
-					tmpTypes[i] = false;
-			}
+			if (types.graphics && queueFamily.types.graphics) types.graphics = false;
+			if (types.compute && queueFamily.types.compute) types.compute = false;
+			if (types.transfer && queueFamily.types.transfer) types.transfer = false;
+			if (types.sparseBinding && queueFamily.types.sparseBinding) types.sparseBinding = false;
 		}
-		return std::ranges::all_of(tmpTypes, [](bool i) { return !i; });
+		return types.areAllFalse();
 	}
 
 	bool doesDeviceContainPresentQueue(svk::PhysicalDevice* device)
@@ -254,6 +282,15 @@ private:
 			capabilities.maxImageExtent.height);
 
 		return extent;
+	}
+
+	uint32_t findSwapchainImgCount()
+	{
+		auto capabilities = window.getSurface().getProperties(physicalDevice).capabilities;
+		uint32_t imageCount = capabilities.minImageCount + 1;
+		if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount)
+			imageCount = capabilities.maxImageCount;
+		return imageCount;
 	}
 };
 

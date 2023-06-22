@@ -1,5 +1,6 @@
 #include "LogicalDevice.hpp"
 
+#include <set>
 #include <stdexcept>
 
 #include "PhysicalDevice.hpp"
@@ -17,7 +18,7 @@ namespace svk
 
 		VkDeviceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		
+
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		for (auto& queue : queues)
 		{
@@ -36,20 +37,20 @@ namespace svk
 		if (!enabledExtensions.empty())
 			createInfo.ppEnabledExtensionNames = enabledExtensions.data();
 
-        createInfo.enabledLayerCount = static_cast<uint32_t>(enabledLayers.size());
+		createInfo.enabledLayerCount = static_cast<uint32_t>(enabledLayers.size());
 		if (!enabledLayers.empty())
 			createInfo.ppEnabledLayerNames = enabledLayers.data();
-		
-        createInfo.pEnabledFeatures = &enabledFeatures;
 
-		if (vkCreateDevice(pDevice->getVKHandle(), &createInfo, nullptr, &vkHandle) != VK_SUCCESS) 
-            throw std::runtime_error("failed to create logical device!");
+		createInfo.pEnabledFeatures = &enabledFeatures;
+
+		if (vkCreateDevice(pDevice->getVKHandle(), &createInfo, nullptr, &vkHandle) != VK_SUCCESS)
+			throw std::runtime_error("failed to create logical device!");
 
 		for (auto& queue : queues)
 		{
 			for (uint32_t i = 0; i < queue.queueCount; i++)
 			{
-				generateQueue({queue.queueFamily.index, i});
+				generateQueue({ queue.queueFamily.index, i });
 			}
 		}
 	}
@@ -60,13 +61,13 @@ namespace svk
 		if (existingQueuePos >= queues.size())
 		{
 			queues.emplace_back(pQueueFamily, queueCount, pQueuePriorities);
-			return {(uint32_t)(queues.size() - 1), 0};
+			return { (uint32_t)(queues.size() - 1), 0 };
 		}
 		auto qPos = queues[existingQueuePos].queueCount;
 		queues[existingQueuePos].queueCount += queueCount;
 		for (auto priority : pQueuePriorities)
 			queues[existingQueuePos].pQueuePriorities.push_back(priority);
-		return {existingQueuePos, qPos};
+		return { existingQueuePos, qPos };
 	}
 
 	QueuePosition LogicalDevice::addSingleQueue(QueueFamily pQueueFamily, float priority)
@@ -74,13 +75,13 @@ namespace svk
 		uint32_t existingQueuePos = getQueuePosFromIndex(pQueueFamily.index);
 		if (existingQueuePos >= queues.size())
 		{
-			std::vector<float> priorities = {priority};
+			std::vector<float> priorities = { priority };
 			queues.emplace_back(pQueueFamily, 1, priorities);
-			return {(uint32_t)(queues.size() - 1), 0};
+			return { (uint32_t)(queues.size() - 1), 0 };
 		}
 		auto qPos = queues[existingQueuePos].queueCount++;
 		queues[existingQueuePos].pQueuePriorities.push_back(priority);
-		return {existingQueuePos, qPos};
+		return { existingQueuePos, qPos };
 	}
 
 	uint32_t LogicalDevice::getQueuePosFromIndex(uint32_t familyIndex)
@@ -97,7 +98,7 @@ namespace svk
 	{
 		VkQueue queue;
 		vkGetDeviceQueue(this->vkHandle, index.index, index.offset, &queue);
-		Queue queueHandle{queue};
+		Queue queueHandle{ queue };
 		queueHandles.emplace(index, queueHandle);
 	}
 
@@ -114,5 +115,15 @@ namespace svk
 	void LogicalDevice::addValidationLayers()
 	{
 		addLayer("VK_LAYER_KHRONOS_validation");
+	}
+
+	std::vector<uint32_t> LogicalDevice::getUniqueQueueFamilyIndices()
+	{
+		std::set<uint32_t> uniqueIndices{};
+		for (auto& queue : queues)
+		{
+			uniqueIndices.insert(queue.queueFamily.index);
+		}
+		return std::vector<uint32_t>{uniqueIndices.begin(), uniqueIndices.end()};
 	}
 }

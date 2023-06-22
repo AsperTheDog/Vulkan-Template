@@ -12,7 +12,7 @@ namespace svk
 	public:
 		bool supportsPresent(const Surface* surface);
 
-		bool types[4];
+		QueueTypeSupport types;
 		VkQueueFamilyProperties properties;
 		uint32_t index;
 

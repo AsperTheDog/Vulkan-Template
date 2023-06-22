@@ -21,6 +21,25 @@ namespace svk
 		BINDING
 	};
 
+	enum QueueModes
+	{
+		CONCURRENT = VK_SHARING_MODE_CONCURRENT,
+		EXCLUSIVE = VK_SHARING_MODE_EXCLUSIVE
+	};
+
+	struct QueueTypeSupport
+	{
+		bool graphics = false;
+		bool compute = false;
+		bool transfer = false;
+		bool sparseBinding = false;
+
+		bool areAllFalse()
+		{
+			return !compute && !graphics && !transfer && !sparseBinding;
+		}
+	};
+
 	struct QueuePosition
 	{
 		unsigned index;

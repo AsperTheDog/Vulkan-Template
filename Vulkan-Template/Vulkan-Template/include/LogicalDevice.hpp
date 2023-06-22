@@ -25,6 +25,9 @@ namespace svk
 		void addLayer(const char* layer);
 		void addValidationLayers();
 
+		std::vector<uint32_t> getUniqueQueueFamilyIndices();
+		VkDevice getVKHandle() const { return vkHandle; }
+
 	private:
 		struct QueueCreateInfo
 		{

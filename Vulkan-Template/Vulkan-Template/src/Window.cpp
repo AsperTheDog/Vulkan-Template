@@ -6,15 +6,15 @@
 #include "SDL2/SDL_vulkan.h"
 
 namespace svk {
-	Window::Window(uint16_t width, uint16_t height, const char* name)
+	Window::Window(uint32_t width, uint32_t height, const char* name)
 		: Window(width, height, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, name, SDL_WINDOW_SHOWN | SDL_WINDOW_MAXIMIZED)
 	{}
 
-	Window::Window(uint16_t width, uint16_t height, const char* name, uint32_t flags)
+	Window::Window(uint32_t width, uint32_t height, const char* name, uint32_t flags)
 		: Window(width, height, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, name, flags)
 	{}
 
-	Window::Window(uint16_t width, uint16_t height, uint16_t top, uint16_t left, const char* name, uint32_t flags)
+	Window::Window(uint32_t width, uint32_t height, uint32_t top, uint32_t left, const char* name, uint32_t flags)
 	{
 		size.width = width;
 		size.height = height;

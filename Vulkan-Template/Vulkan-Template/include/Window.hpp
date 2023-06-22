@@ -20,9 +20,9 @@ namespace svk
 
 		// INITIALIZERS
 
-		Window(uint16_t width, uint16_t height, const char* name);
-		Window(uint16_t width, uint16_t height, const char* name, uint32_t flags);
-		Window(uint16_t width, uint16_t height, uint16_t top, uint16_t left, const char* name, uint32_t flags);
+		Window(uint32_t width, uint32_t height, const char* name);
+		Window(uint32_t width, uint32_t height, const char* name, uint32_t flags);
+		Window(uint32_t width, uint32_t height, uint32_t top, uint32_t left, const char* name, uint32_t flags);
 		~Window()
 		{
 			SDL_DestroyWindow(SDLHandle);

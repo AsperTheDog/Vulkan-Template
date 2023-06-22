@@ -16,12 +16,12 @@ namespace svk
 	: types{ false, false, false, false }, properties(properties), index(index), device(device)
 	{
 		if (properties.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			types[QueueFamilyTypes::GRAPHICS] = true;
+			types.graphics = true;
 		else if (properties.queueFlags & VK_QUEUE_COMPUTE_BIT)
-			types[QueueFamilyTypes::COMPUTE] = true;
+			types.compute = true;
 		else if (properties.queueFlags & VK_QUEUE_TRANSFER_BIT)
-			types[QueueFamilyTypes::TRANSFER] = true;
-		else
-			types[QueueFamilyTypes::BINDING] = true;
+			types.transfer = true;
+		else if (properties.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT)
+			types.sparseBinding = true;
 	}
 }
