@@ -8,7 +8,7 @@ namespace svk
 	bool QueueFamily::supportsPresent(const Surface* surface)
 	{
 		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device->getVKHandle(), index, surface->getVKHandle(), &presentSupport);
+		vkGetPhysicalDeviceSurfaceSupportKHR(this->device->getVKHandle(), this->index, surface->getVKHandle(), &presentSupport);
 		return presentSupport == VK_TRUE;
 	}
 
@@ -16,12 +16,12 @@ namespace svk
 	: types{ false, false, false, false }, properties(properties), index(index), device(device)
 	{
 		if (properties.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			types.graphics = true;
+			this->types.graphics = true;
 		else if (properties.queueFlags & VK_QUEUE_COMPUTE_BIT)
-			types.compute = true;
+			this->types.compute = true;
 		else if (properties.queueFlags & VK_QUEUE_TRANSFER_BIT)
-			types.transfer = true;
+			this->types.transfer = true;
 		else if (properties.queueFlags & VK_QUEUE_SPARSE_BINDING_BIT)
-			types.sparseBinding = true;
+			this->types.sparseBinding = true;
 	}
 }

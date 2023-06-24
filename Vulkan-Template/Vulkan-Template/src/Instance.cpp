@@ -8,7 +8,7 @@ namespace svk
 {
 	Instance::~Instance()
 	{
-		vkDestroyInstance(vkHandle, nullptr);
+		vkDestroyInstance(this->vkHandle, nullptr);
 	}
 
 	void Instance::commit(uint32_t apiVersion)
@@ -28,12 +28,12 @@ namespace svk
 		if (!this->extensions.empty())
 		{
 			info.enabledExtensionCount = static_cast<uint32_t>(this->extensions.size());
-			info.ppEnabledExtensionNames = extensions.data();
+			info.ppEnabledExtensionNames = this->extensions.data();
 		}
 		if (!this->layers.empty())
 		{
 			info.enabledLayerCount = static_cast<uint32_t>(this->layers.size());
-			info.ppEnabledLayerNames = layers.data();
+			info.ppEnabledLayerNames = this->layers.data();
 		}
 
 		if (vkCreateInstance(&info, nullptr, &this->vkHandle) != VK_SUCCESS)

@@ -6,28 +6,28 @@ namespace svk
 
 	Surface::~Surface()
 	{
-		vkDestroySurfaceKHR(instance->getVkHandle(), vkHandle, nullptr);
+		vkDestroySurfaceKHR(this->instance->getVkHandle(), this->vkHandle, nullptr);
 	}
 	
 	SurfaceProperties Surface::getProperties(const PhysicalDevice* device) const
 	{
 		SurfaceProperties properties;
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->getVKHandle(), vkHandle, &properties.capabilities);
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device->getVKHandle(), this->vkHandle, &properties.capabilities);
 
 		uint32_t formatCount;
-		vkGetPhysicalDeviceSurfaceFormatsKHR(device->getVKHandle(), vkHandle, &formatCount, nullptr);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(device->getVKHandle(), this->vkHandle, &formatCount, nullptr);
 		if (formatCount != 0)
 		{
 			properties.formats.resize(formatCount);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(device->getVKHandle(), vkHandle, &formatCount, properties.formats.data());
+			vkGetPhysicalDeviceSurfaceFormatsKHR(device->getVKHandle(), this->vkHandle, &formatCount, properties.formats.data());
 		}
 
 		uint32_t presentModeCount;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(device->getVKHandle(), vkHandle, &presentModeCount, nullptr);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(device->getVKHandle(), this->vkHandle, &presentModeCount, nullptr);
 		if (presentModeCount != 0)
 		{
 			properties.presentModes.resize(presentModeCount);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(device->getVKHandle(), vkHandle, &presentModeCount, properties.presentModes.data());
+			vkGetPhysicalDeviceSurfacePresentModesKHR(device->getVKHandle(), this->vkHandle, &presentModeCount, properties.presentModes.data());
 		}
 		
 		return properties;

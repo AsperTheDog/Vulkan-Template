@@ -10,10 +10,10 @@ namespace svk
 	bool PhysicalDevice::areExtensionsSupported(std::vector<const char*> exts)
 	{
 		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties(vkHandle, nullptr, &extensionCount, nullptr);
+		vkEnumerateDeviceExtensionProperties(this->vkHandle, nullptr, &extensionCount, nullptr);
 
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-		vkEnumerateDeviceExtensionProperties(vkHandle, nullptr, &extensionCount, availableExtensions.data());
+		vkEnumerateDeviceExtensionProperties(this->vkHandle, nullptr, &extensionCount, availableExtensions.data());
 
 		std::set<std::string> requiredExtensions(exts.begin(), exts.end());
 
@@ -26,10 +26,10 @@ namespace svk
 	bool PhysicalDevice::isExtensionSupported(const char* ext)
 	{
 		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties(vkHandle, nullptr, &extensionCount, nullptr);
+		vkEnumerateDeviceExtensionProperties(this->vkHandle, nullptr, &extensionCount, nullptr);
 
 		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-		vkEnumerateDeviceExtensionProperties(vkHandle, nullptr, &extensionCount, availableExtensions.data());
+		vkEnumerateDeviceExtensionProperties(this->vkHandle, nullptr, &extensionCount, availableExtensions.data());
 
 		for (const auto& extension : availableExtensions)
 			if (strcmp(extension.extensionName, ext) == 0)
@@ -62,30 +62,30 @@ namespace svk
 	VkPhysicalDeviceProperties PhysicalDevice::getProperties() const
 	{
 		VkPhysicalDeviceProperties properties;
-		vkGetPhysicalDeviceProperties(vkHandle, &properties);
+		vkGetPhysicalDeviceProperties(this->vkHandle, &properties);
 		return properties;
 	}
 
 	VkPhysicalDeviceFeatures PhysicalDevice::getFeatures() const
 	{
 		VkPhysicalDeviceFeatures features;
-		vkGetPhysicalDeviceFeatures(vkHandle, &features);
+		vkGetPhysicalDeviceFeatures(this->vkHandle, &features);
 		return features;
 	}
 
 	VkPhysicalDeviceMemoryProperties PhysicalDevice::getMemoryProperties() const
 	{
 		VkPhysicalDeviceMemoryProperties properties;
-		vkGetPhysicalDeviceMemoryProperties(vkHandle, &properties);
+		vkGetPhysicalDeviceMemoryProperties(this->vkHandle, &properties);
 		return properties;
 	}
 
 	std::vector<QueueFamily> PhysicalDevice::getQueueFamilies() const
 	{
 		uint32_t familyCount = 0;
-		vkGetPhysicalDeviceQueueFamilyProperties(vkHandle, &familyCount, nullptr);
+		vkGetPhysicalDeviceQueueFamilyProperties(this->vkHandle, &familyCount, nullptr);
 		std::vector<VkQueueFamilyProperties> vkFamilies{familyCount};
-		vkGetPhysicalDeviceQueueFamilyProperties(vkHandle, &familyCount, vkFamilies.data());
+		vkGetPhysicalDeviceQueueFamilyProperties(this->vkHandle, &familyCount, vkFamilies.data());
 
 		std::vector<QueueFamily> families;
 		for (uint32_t i = 0; i < familyCount; i++)

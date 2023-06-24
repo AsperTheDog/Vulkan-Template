@@ -4,13 +4,14 @@
 
 #include <vulkan/vk_enum_string_helper.h>
 
+#include "Image.hpp"
 #include "SimpleVk.hpp"
 #include "Window.hpp"
+#include "GraphicsPipeline.hpp"
 
 class SimpleVkExample
 {
 public:
-
 	SimpleVkExample() : window(1920, 1080, "SimpleVk Example")
 	{
 		std::cout << "Initiated window\n\n";
@@ -19,6 +20,8 @@ public:
 		this->getPhysicalDevice();
 		this->getLogicalDevice();
 		this->getSwapchain();
+		this->getSwapchainImageViews();
+		this->getGraphicsPipeline();
 	}
 
 private:
@@ -27,6 +30,7 @@ private:
 	svk::PhysicalDevice* physicalDevice{};
 	svk::LogicalDevice logicalDevice;
 	svk::Swapchain swapchain;
+	svk::GraphicsPipeline pipeline;
 
 	svk::QueuePosition graphicsQueue{};
 	svk::QueuePosition presentQueue{};
@@ -212,6 +216,8 @@ private:
 		swapchain.setDesiredPresentMode(VK_PRESENT_MODE_MAILBOX_KHR);
 		swapchain.setExtent(desiredExtent);
 		std::cout << "Swapchain extent set to " << desiredExtent.width << "x" << desiredExtent.height << "\n";
+		swapchain.setDesiredLayers(1);
+		swapchain.setDesiredImageUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
 		swapchain.setImageCount(desiredImageCount);
 		std::cout << "Swapchain image count set to " << desiredImageCount << "\n";
 		if (uniqueQueueNum < 2)
@@ -231,6 +237,32 @@ private:
 
 		swapchain.commit(logicalDevice, window.getSurface());
 		std::cout << "Created swapchain\n\n";
+	}
+
+	void getSwapchainImageViews()
+	{
+		svk::ImageView imgView;
+		imgView.setFormat(swapchain.getSwapchainFormat().format);
+		imgView.setType(VK_IMAGE_VIEW_TYPE_2D);
+		imgView.setComponentMapping(VK_COMPONENT_SWIZZLE_IDENTITY);
+		imgView.setSubresourceRange({VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
+
+		swapchain.generateImageViews(imgView);
+		std::cout << "Generated Image Views\n\n";
+	}
+
+	void getGraphicsPipeline()
+	{
+		svk::Shader vertShader("temp/shaders/shader.vert");
+		svk::Shader fragShader("temp/shaders/shader.frag");
+
+		pipeline.addShader(VK_SHADER_STAGE_VERTEX_BIT, "main", vertShader);
+		std::cout << "Added vertex shader to render pipeline from file " << vertShader.getFilename() << "\n";
+		pipeline.addShader(VK_SHADER_STAGE_FRAGMENT_BIT, "main", fragShader);
+		std::cout << "Added fragment shader to render pipeline from file " << fragShader.getFilename() << "\n";
+
+		pipeline.commit(&logicalDevice, true);
+		std::cout << "Compiled shaders and created Graphics Pipeline\n\n";
 	}
 
 	// ASSIST FUNCTIONS

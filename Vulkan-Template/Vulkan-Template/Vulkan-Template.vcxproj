@@ -140,6 +140,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\GraphicsPipeline.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\LogicalDevice.cpp" />
     <ClCompile Include="src\PhysicalDevice.cpp" />
     <ClCompile Include="src\Instance.cpp" />
@@ -150,6 +153,8 @@
     <ClCompile Include="src\Swapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\GraphicsPipeline.hpp" />
+    <ClInclude Include="include\Image.hpp" />
     <ClInclude Include="include\Queue.hpp" />
     <ClInclude Include="include\SimpleVk_core.hpp" />
     <ClInclude Include="include\Instance.hpp" />
@@ -157,6 +162,7 @@
     <ClInclude Include="include\LogicalDevice.hpp" />
     <ClInclude Include="include\Window.hpp" />
     <ClInclude Include="include\SimpleVk.hpp" />
+    <ClInclude Include="include\Shader.hpp" />
     <ClInclude Include="SimpleVkExample.hpp" />
     <ClInclude Include="include\Surface.hpp" />
     <ClInclude Include="include\Swapchain.hpp" />
